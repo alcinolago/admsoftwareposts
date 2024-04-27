@@ -53,8 +53,15 @@ dependencies {
     // For control over item selection of both touch and mouse driven selection
     implementation(libs.recyclerview.selection)
 
+    // RxJava 3
     implementation(libs.rxjava3.rxjava)
 
+    // RETROFIT 2
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.rxjava3.retrofit.adapter)
+
+    // Room Database
     implementation(libs.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     // RxJava3 support for Room
