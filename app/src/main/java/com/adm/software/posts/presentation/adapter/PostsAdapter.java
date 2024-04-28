@@ -1,24 +1,26 @@
 package com.adm.software.posts.presentation.adapter;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.adm.software.posts.R;
 import com.adm.software.posts.data.model.PostResponse;
-import java.util.Collections;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class PostsAdapter extends RecyclerView.Adapter<PostsViewHolder> {
 
-    List<PostResponse> list = Collections.emptyList();
-    Context context;
+    PostsListener listener;
+    List<PostResponse> list = new ArrayList<>();
 
-    public PostsAdapter(List<PostResponse> list, Context context) {
-        this.list = list;
-        this.context = context;
+    public PostsAdapter(PostsListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,6 +34,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsViewHolder> {
     public void onBindViewHolder(PostsViewHolder viewHolder, final int position) {
         viewHolder.title.setText(list.get(position).getTitle());
         viewHolder.body.setText(list.get(position).getBody());
+        viewHolder.layout.setOnClickListener(v -> listener.eventsOnClick(list.get(position)));
     }
 
     @Override
@@ -44,14 +47,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsViewHolder> {
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    public void insert(int position, PostResponse data) {
-        list.add(position, data);
-        notifyItemInserted(position);
-    }
-
-    public void remove(PostResponse data) {
-        int position = list.indexOf(data);
-        list.remove(position);
-        notifyItemRemoved(position);
+    @SuppressLint("NotifyDataSetChanged")
+    public void addItems(List<PostResponse> data) {
+        this.list.clear();
+        this.list.addAll(data);
+        notifyDataSetChanged();
     }
 }

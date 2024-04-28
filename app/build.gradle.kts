@@ -23,10 +23,12 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     hilt {
         enableAggregatingTask = false
     }
@@ -42,6 +44,8 @@ dependencies {
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.compiler)
 
+    implementation(libs.androidx.core.splashscreen)
+
     // ViewModel
     implementation(libs.lifecycle.viewmodel)
     // LiveData
@@ -55,11 +59,14 @@ dependencies {
 
     // RxJava 3
     implementation(libs.rxjava3.rxjava)
+    implementation(libs.rxandroid)
 
     // RETROFIT 2
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.rxjava3.retrofit.adapter)
+    implementation(libs.logging.interceptor)
+    implementation(libs.okhttp)
 
     // Room Database
     implementation(libs.room.runtime)

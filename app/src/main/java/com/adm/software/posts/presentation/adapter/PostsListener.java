@@ -1,7 +1,7 @@
 package com.adm.software.posts.presentation.adapter;
 
-import android.view.View;
+import com.adm.software.posts.data.model.PostResponse;
 
 public interface PostsListener {
-    void eventsOnClick(View view, Integer position);
+    void eventsOnClick(PostResponse post);
 }

@@ -1,29 +1,38 @@
 package com.adm.software.posts.presentation.main;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.adm.software.posts.Constants;
 import com.adm.software.posts.R;
 import com.adm.software.posts.data.model.PostResponse;
 import com.adm.software.posts.presentation.adapter.PostsAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.adm.software.posts.presentation.adapter.PostsListener;
+import com.adm.software.posts.presentation.post.PostActivity;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PostsListener, ViewTreeObserver.OnPreDrawListener {
 
     private MainViewModel mainViewModel;
+    private View content;
+    private RecyclerView recyclerView;
+    private Toolbar toolbar;
+    PostsAdapter adapter = new PostsAdapter(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,25 +40,104 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        List<PostResponse> data = fill_with_data();
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        PostsAdapter adapter = new PostsAdapter(data, getApplication());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        initViews();
+        setupSplashScreen();
+        setUpToolbar();
+        setUpRecyclerView();
+        setUpAdapterRecyclerView();
+        observePosts();
     }
 
-    public List<PostResponse> fill_with_data() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mainViewModel.getPosts();
+    }
 
-        List<PostResponse> data = new ArrayList<>();
+    private void initViews() {
+        content = findViewById(android.R.id.content);
+        toolbar = findViewById(R.id.toolbar_main);
+        recyclerView = findViewById(R.id.recyclerview);
+    }
 
-        data.add(new PostResponse(1,1,"Batman vs Superman", "Following the destruction of Metropolis, Batman embarks on a personal vendetta against Superman"));
-        data.add(new PostResponse(2,1,"X-Men: Apocalypse", "X-Men: Apocalypse is an upcoming American superhero film based on the X-Men characters that appear in Marvel Comics"));
-        data.add(new PostResponse(3,1,"Captain America: Civil War", "A feud between Captain America and Iron Man leaves the Avengers in turmoil."));
-        data.add(new PostResponse(4,1,"Kung Fu Panda 3", "After reuniting with his long-lost father, Po  must train a village of pandas"));
-        data.add(new PostResponse(5,1,"Warcraft", "Fleeing their dying home to colonize another, fearsome orc warriors invade the peaceful realm of Azeroth."));
-        data.add(new PostResponse(6,1,"Alice in Wonderland", "Alice in Wonderland: Through the Looking Glass"));
+    private void setupSplashScreen() {
+        content.getViewTreeObserver().addOnPreDrawListener(
+                () -> {
+                    if (mainViewModel.isReady) {
+                        content.getViewTreeObserver().removeOnPreDrawListener(this);
+                        return true;
+                    }
+                    return false;
+                });
+    }
 
-        return data;
+    private void setUpToolbar() {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(false);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.itemToolbarAddPost) {
+            Intent intent = new Intent(this, PostActivity.class);
+            Bundle dataBundle = new Bundle();
+            dataBundle.putString(Constants.CREATE_POST, Constants.CREATE_POST);
+            intent.putExtras(dataBundle);
+            startActivity(intent);
+            return true;
+        }
+        return false;
+    }
+
+    private void setUpRecyclerView() {
+        LinearLayoutManager layout = new LinearLayoutManager(this,
+                RecyclerView.VERTICAL, false);
+
+        recyclerView.setHasFixedSize(true);
+
+        recyclerView.addItemDecoration(
+                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        recyclerView.setLayoutManager(layout);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void setUpAdapterRecyclerView() {
+
+
+    }
+
+    public void observePosts() {
+        mainViewModel.postMutableLiveData.observe(this, postResponses -> {
+            if (postResponses != null && !postResponses.isEmpty()) {
+                adapter.addItems(postResponses);
+            }
+        });
+    }
+
+    @Override
+    public void eventsOnClick(PostResponse post) {
+        Intent postIntent = new Intent(this, PostActivity.class);
+        Bundle dataBundle = new Bundle();
+        dataBundle.putInt("postId", post.getId());
+        dataBundle.putString(Constants.VIEW_POST, Constants.VIEW_POST);
+        postIntent.putExtras(dataBundle);
+        startActivity(postIntent);
+    }
+
+    @Override
+    public boolean onPreDraw() {
+        return false;
     }
 }

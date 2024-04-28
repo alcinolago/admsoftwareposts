@@ -3,12 +3,16 @@ package com.adm.software.posts.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class PostResponse {
-    @SerializedName("id") Integer id;
-    @SerializedName("userId") Integer userId;
-    @SerializedName("title") String title;
-    @SerializedName("body") String body;
+    @SerializedName("id")
+    Integer id;
+    @SerializedName("userId")
+    Integer userId;
+    @SerializedName("title")
+    String title;
+    @SerializedName("body")
+    String body;
 
-    public PostResponse(Integer id, Integer userId, String title, String body){
+    public PostResponse(Integer id, Integer userId, String title, String body) {
         this.id = id;
         this.userId = userId;
         this.title = title;
