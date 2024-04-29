@@ -1,7 +1,7 @@
 package com.adm.software.posts.presentation.adapter;
 
-import com.adm.software.posts.data.model.PostResponse;
+import com.adm.software.posts.data.entities.PostEntity;
 
 public interface PostsListener {
-    void eventsOnClick(PostResponse post);
+    void eventsOnClick(PostEntity post);
 }

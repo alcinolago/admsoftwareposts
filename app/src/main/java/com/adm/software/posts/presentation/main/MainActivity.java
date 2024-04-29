@@ -1,6 +1,8 @@
 package com.adm.software.posts.presentation.main;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,10 +20,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.adm.software.posts.Constants;
 import com.adm.software.posts.R;
-import com.adm.software.posts.data.model.PostResponse;
+import com.adm.software.posts.data.entities.PostEntity;
+import com.adm.software.posts.domain.mapper.PostMapperToEntity;
 import com.adm.software.posts.presentation.adapter.PostsAdapter;
 import com.adm.software.posts.presentation.adapter.PostsListener;
 import com.adm.software.posts.presentation.post.PostActivity;
+
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -44,14 +49,13 @@ public class MainActivity extends AppCompatActivity implements PostsListener, Vi
         setupSplashScreen();
         setUpToolbar();
         setUpRecyclerView();
-        setUpAdapterRecyclerView();
         observePosts();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mainViewModel.getPosts();
+        checkFirstsSyncData();
     }
 
     private void initViews() {
@@ -113,27 +117,50 @@ public class MainActivity extends AppCompatActivity implements PostsListener, Vi
         recyclerView.setAdapter(adapter);
     }
 
-    private void setUpAdapterRecyclerView() {
-
-
-    }
-
     public void observePosts() {
         mainViewModel.postMutableLiveData.observe(this, postResponses -> {
             if (postResponses != null && !postResponses.isEmpty()) {
-                adapter.addItems(postResponses);
+                List<PostEntity> postEntity = PostMapperToEntity.objectListToMapper(postResponses);
+                adapter.addItems(postEntity);
+            }
+        });
+
+        mainViewModel.postSyncedInRoom.observe(this, postsSynced -> {
+            if (postsSynced) {
+                addFirstsSyncDataInPreferences();
+                mainViewModel.getPostsFromLocal();
             }
         });
     }
 
     @Override
-    public void eventsOnClick(PostResponse post) {
+    public void eventsOnClick(PostEntity post) {
         Intent postIntent = new Intent(this, PostActivity.class);
         Bundle dataBundle = new Bundle();
-        dataBundle.putInt("postId", post.getId());
+        dataBundle.putInt("postId", post.getPostId());
         dataBundle.putString(Constants.VIEW_POST, Constants.VIEW_POST);
         postIntent.putExtras(dataBundle);
         startActivity(postIntent);
+    }
+
+    private void checkFirstsSyncData() {
+
+        SharedPreferences preferences = getSharedPreferences(Constants.FIRST_SYNC, Context.MODE_PRIVATE);
+
+        if (preferences.contains(Constants.FIRST_SYNC)) {
+            mainViewModel.getPostsFromLocal();
+        } else {
+            mainViewModel.getPostsFromRemote();
+        }
+    }
+
+    private void addFirstsSyncDataInPreferences() {
+
+        SharedPreferences preferences = getSharedPreferences(Constants.FIRST_SYNC, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(Constants.FIRST_SYNC, true);
+        editor.apply();
     }
 
     @Override

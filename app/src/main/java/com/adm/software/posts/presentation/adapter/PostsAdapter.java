@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.adm.software.posts.R;
-import com.adm.software.posts.data.model.PostResponse;
+import com.adm.software.posts.data.entities.PostEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 public class PostsAdapter extends RecyclerView.Adapter<PostsViewHolder> {
 
     PostsListener listener;
-    List<PostResponse> list = new ArrayList<>();
+    List<PostEntity> list = new ArrayList<>();
 
     public PostsAdapter(PostsListener listener) {
         this.listener = listener;
@@ -48,7 +48,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsViewHolder> {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void addItems(List<PostResponse> data) {
+    public void addItems(List<PostEntity> data) {
         this.list.clear();
         this.list.addAll(data);
         notifyDataSetChanged();

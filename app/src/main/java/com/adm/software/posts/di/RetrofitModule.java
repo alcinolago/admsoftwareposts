@@ -1,6 +1,9 @@
 package com.adm.software.posts.di;
 
+import com.adm.software.posts.data.database.AppDatabase;
 import com.adm.software.posts.data.repository.PostRepository;
+import com.adm.software.posts.domain.interactor.PostLocalInteractor;
+import com.adm.software.posts.domain.interactor.PostLocalInteractorImpl;
 import com.adm.software.posts.domain.interactor.PostRemoteInteractor;
 import com.adm.software.posts.domain.interactor.PostRemoteInteractorImpl;
 
